@@ -1,11 +1,5 @@
-# Federated-Learning (PyTorch)
+# FedBS: Learning Batch Statistics for Non-IID Data
 
-Implementation of the vanilla federated learning paper : [Communication-Efficient Learning of Deep Networks from Decentralized Data](https://arxiv.org/abs/1602.05629).
-
-
-Experiments are produced on MNIST, Fashion MNIST and CIFAR10 (both IID and non-IID). In case of non-IID, the data amongst the users can be split equally or unequally.
-
-Since the purpose of these experiments are to illustrate the effectiveness of the federated learning paradigm, only simple models such as MLP and CNN are used.
 
 ## Requirments
 Install all the packages from requirments.txt
@@ -13,49 +7,42 @@ Install all the packages from requirments.txt
 * Pytorch
 * Torchvision
 
-## Data
-* Download train and test datasets manually or they will be automatically downloaded from torchvision datasets.
-* Experiments are run on Mnist, Fashion Mnist and Cifar.
-* To use your own dataset: Move your dataset to data directory and write a wrapper on pytorch dataset class.
+## Datasets
+* Datasets will be automatically downloaded from torchvision datasets.
+* Experiments are run on Mnist, Fashion Mnist and Cifar-10.
 
-## Running the experiments
-The baseline experiment trains the model in the conventional way.
-
-* To run the baseline experiment with MNIST on MLP using CPU:
+## Reproducing experiments
+* To run FedBS with MNIST on CNN with Batch Normalization using CPU (Non-IID):
 ```
-python src/baseline_main.py --model=mlp --dataset=mnist --epochs=10
+python src/federated_main.py --norm="BN" --model=cnn --dataset=mnist  --iid=0  --epochs=400  --ma="cma" --verbose=0
 ```
-* Or to run it on GPU (eg: if gpu:0 is available):
+* Or using GPU (if available):
 ```
-python src/baseline_main.py --model=mlp --dataset=mnist --gpu=0 --epochs=10
+python src/federated_main.py --norm="BRN" --model=cnn --dataset=fmnist  --iid=0 --gpu="cuda:0"  --epochs=400  --ma="cma" --verbose=0
 ```
 -----
 
-Federated experiment involves training a global model using many local models.
 
-* To run the federated experiment with CIFAR on CNN (IID):
+* To run the baseline experiment with MNIST on CNN with Batch ReNormalization (Non-IID):
 ```
-python src/federated_main.py --model=cnn --dataset=cifar --gpu=0 --iid=1 --epochs=10
-```
-* To run the same experiment under non-IID condition:
-```
-python src/federated_main.py --model=cnn --dataset=cifar --gpu=0 --iid=0 --epochs=10
+python src/baseline_main.py --norm="BRN" --model=cnn --dataset=mnist  --iid=0 --gpu="cuda:0"  --epochs=400  --ma="ema-brn" --verbose=0
 ```
 
-You can change the default values of other parameters to simulate different conditions. Refer to the options section.
 
 ## Options
-The default values for various paramters parsed to the experiment are given in ```options.py```. Details are given some of those parameters:
+You can change the following options to simulate different experiments:
 
-* ```--dataset:```  Default: 'mnist'. Options: 'mnist', 'fmnist', 'cifar'
-* ```--model:```    Default: 'mlp'. Options: 'mlp', 'cnn'
-* ```--gpu:```      Default: None (runs on CPU). Can also be set to the specific gpu id.
+* ```--dataset:```  'mnist', 'fmnist' or 'cifar'. Default: 'mnist'.
+* ```--model:```    'mlp', 'cnn'. Default: 'cnn'
+* ```--gpu:```      "cuda:id" or None(CPU). Default: None.
 * ```--epochs:```   Number of rounds of training.
 * ```--lr:```       Learning rate set to 0.01 by default.
 * ```--verbose:```  Detailed log outputs. Activated by default, set to 0 to deactivate.
 * ```--seed:```     Random Seed. Default set to 1.
+* ```--Norm:```     BN (Batch Normalization) or BRN (Batch Renormalization). Default: BN.
+* ```--ma:```     Moving average method used. 'cma', 'ema', 'sma', 'ema-brn'. Default: 'ema'
+* ```--resume:```     Default: 0. Set to 1 to resume the training.
 
-#### Federated Parameters
 * ```--iid:```      Distribution of data amongst users. Default set to IID. Set to 0 for non-IID.
 * ```--num_users:```Number of users. Default is 100.
 * ```--frac:```     Fraction of users to be used for federated updates. Default is 0.1.
